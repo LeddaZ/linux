@@ -695,13 +695,12 @@ static struct dma_chan *find_candidate(struct dma_device *device,
  */
 struct dma_chan *dma_get_slave_channel(struct dma_chan *chan)
 {
-	int err = -EBUSY;
-
 	/* lock against __dma_request_channel */
 	mutex_lock(&dma_list_mutex);
 
 	if (chan->client_count == 0) {
 		struct dma_device *device = chan->device;
+		int err;
 
 		dma_cap_set(DMA_PRIVATE, device->cap_mask);
 		device->privatecnt++;
@@ -1086,6 +1085,7 @@ static int __dma_async_device_channel_register(struct dma_device *device,
 	kfree(chan->dev);
  err_free_local:
 	free_percpu(chan->local);
+	chan->local = NULL;
 	return rc;
 }
 
@@ -1110,7 +1110,6 @@ static void __dma_async_device_channel_unregister(struct dma_device *device,
 		  "%s called while %d clients hold a reference\n",
 		  __func__, chan->client_count);
 	mutex_lock(&dma_list_mutex);
-	list_del(&chan->device_node);
 	device->chancnt--;
 	chan->dev->chan = NULL;
 	mutex_unlock(&dma_list_mutex);
