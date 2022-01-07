@@ -59,6 +59,7 @@ config CTR_TSC
 config CTR_TSC_TOUCH
 	tristate "Nintendo 3DS touchscreen/circlepad driver"
 	depends on CTR_TSC
+	depends on FONTS
 	select INPUT_POLLDEV
 	default y
 	help
